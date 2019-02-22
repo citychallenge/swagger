@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common/utils/shared.utils';
 import { InstanceWrapper } from '@nestjs/core/injector/container';
 import { MetadataScanner } from '@nestjs/core/metadata-scanner';
-import { isArray, isEmpty, mapValues, omitBy } from 'lodash';
+import { isArray, isEmpty, mapValues, omitBy, reverse } from 'lodash';
 import * as pathToRegexp from 'path-to-regexp';
 import {
   exploreApiConsumesMetadata,
@@ -118,6 +118,13 @@ export class SwaggerExplorer {
           globalMetadata,
           omitBy(methodMetadata, isEmpty)
         );
+
+        if (mergedMethodMetadata.root && mergedMethodMetadata.root.parameters) {
+          // Reverse parameters, because recursion places them in wrong order
+          mergedMethodMetadata.root.parameters = reverse(
+            mergedMethodMetadata.root.parameters
+          );
+        }
         this.assignDefaultMimeType(mergedMethodMetadata, 'produces');
         this.assignDefaultMimeType(mergedMethodMetadata, 'consumes');
         return {
